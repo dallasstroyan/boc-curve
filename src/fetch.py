@@ -1,13 +1,15 @@
 """TODO
 Status error messages
+Implement FRED request
+Seperate requests for Bonds and bills
+
 """
 
 import requests
 import json
 import datetime as dt
-from config import GOC_BENCHMARKS, GOC_TBILLS, DEFAULT_START_DATE, RAW_DIR
-
-Path = vars
+from pathlib import Path
+from src.config import GOC_BENCHMARKS, GOC_TBILLS, DEFAULT_START_DATE, RAW_DIR
 
 def fetch_series(series_codes: list[str], start_date: str) -> Path:
     """GET from Valet, write raw JSON to data/raw/ with a UTC timestamp, 
@@ -17,7 +19,21 @@ def fetch_series(series_codes: list[str], start_date: str) -> Path:
 
     current_time = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
-    r = requests.get(url)
+    out_path = RAW_DIR / f"goc_{current_time}.json"
+
+    r = requests.get(url, timeout=30)
+
+    # Error Handling
+    if not r.ok():
+        raise RuntimeError(f"Valet request failed ({r.status_code}) for {series_codes}: {r.text[:200]}")
+
+    try:
+        data = r.json()
+    except ValueError as e:
+        raise RuntimeError(f"Response not was not valid JSON: {r.text[:200]}") from e
+
+    if not data.get("observations"):
+        raise RuntimeError(f"No observations returned for {series_codes} from {start_date}")
 
     #Check status
     status = r.status_code
@@ -25,13 +41,18 @@ def fetch_series(series_codes: list[str], start_date: str) -> Path:
     if status == 200:
         data = r.json()
 
-        with open(RAW_DIR/f"{current_time}.json", "w", encoding = "utf-8") as f:
+        with open(out_path, "w", encoding = "utf-8") as f:
             json.dump(data, f, indent = 4)
 
-        return Path
+        return out_path
         
     else: return None
 
 series_codes = ",".join(GOC_BENCHMARKS | GOC_TBILLS)
 
-Path = fetch_series(series_codes, DEFAULT_START_DATE)
+written_path = fetch_series(series_codes, DEFAULT_START_DATE)
+
+if __name__ == "__main__":
+    codes = ",".join(GOC_BENCHMARKS | GOC_TBILLS)
+    path = fetch_series(codes, DEFAULT_START_DATE)
+    print(f"Wrote {path}")
