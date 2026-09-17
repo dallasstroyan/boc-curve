@@ -7,7 +7,7 @@ Par yields are what's quoted, but discount factors are what you actually need to
 
 ## Roadmap
 - [x] **Data Import** - Bank of Canada Valet API client with response validation and timestamped raw snapshots
-- [] **Data Handling** - Cache and organize the data in a robust structure 
+- [ ] **Data Handling** - Cache and organize the data in a robust structure 
 - [] **Bootstrap** - par yields to discount factors to zero rates, validated by repricing the input bonds off the fitted curve
 - [] **Forwards** - 1y1y, 2y1y, and 5y5y implied forwards tracked against the BoC overnight rate to show what the curve is pricing in
 - [] **PCA** - level, slope, and curvature factors extracted from daily curve changes, with variance explaned and factor time series
