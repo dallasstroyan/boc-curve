@@ -2,6 +2,7 @@
 TODO
 Implement FRED request - DO LATER, GET GOC WORKING FIRST
 Validation helper - To be added once FRED requests implemented
+Error Class for clarity on errors across the entire project
 """
 
 import requests
@@ -52,6 +53,6 @@ def fetch_series(series_codes: list[str], start_date: str, label: str) -> Path:
     return out_path
 
 if __name__ == "__main__":
-    name = "GOC_BENCHMARKS"
+    name = "goc_tbills"
     path = fetch_series(list(SERIES_SETS[name]), DEFAULT_START_DATE, label=name)
     print(f"Wrote {path}")
